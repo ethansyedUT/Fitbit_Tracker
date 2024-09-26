@@ -12,3 +12,9 @@
 #-----------------------------------------------------------
 start_gui
 open_project C:/Users/Ethan/Desktop/Classes/ECE460M-DigitalSysDesign/Labs/Lab3/Lab3.xpr
+update_compile_order -fileset sources_1
+open_project C:/Users/Ethan/Desktop/Classes/ECE460M-DigitalSysDesign/Labs/Lab2/Lab2.xpr
+current_project Lab3
+update_compile_order -fileset sources_1
+current_project Lab2
+current_project Lab3
