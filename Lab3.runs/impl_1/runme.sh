@@ -42,6 +42,6 @@ EAStep()
 
 # pre-commands:
 /bin/touch .init_design.begin.rst
-EAStep vivado -log FitBit_Tracker.vdi -applog -m64 -product Vivado -messageDb vivado.pb -mode batch -source FitBit_Tracker.tcl -notrace
+EAStep vivado -log pulse_gen_test.vdi -applog -m64 -product Vivado -messageDb vivado.pb -mode batch -source pulse_gen_test.tcl -notrace
 
 

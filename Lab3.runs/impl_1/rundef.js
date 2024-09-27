@@ -25,7 +25,7 @@ eval( EAInclude(ISEJScriptLib) );
 // pre-commands:
 ISETouchFile( "init_design", "begin" );
 ISEStep( "vivado",
-         "-log FitBit_Tracker.vdi -applog -m64 -product Vivado -messageDb vivado.pb -mode batch -source FitBit_Tracker.tcl -notrace" );
+         "-log pulse_gen_test.vdi -applog -m64 -product Vivado -messageDb vivado.pb -mode batch -source pulse_gen_test.tcl -notrace" );
 
 
 
