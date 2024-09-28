@@ -27,18 +27,19 @@ module sec_gen(clk, slowClk);
   reg[27:0] counter;
 
   initial begin
-    counter = 0;
+    counter = 1;
     slowClk = 0;
   end
 
   always @ (posedge clk)
   begin
-    if(counter == 50000000) begin
+    if(counter == 100_000_000) begin
       counter <= 1;
-      slowClk <= ~slowClk;
+      slowClk <= 1;
     end
     else begin
       counter <= counter + 1;
+      slowClk <= 0;
     end
   end
 

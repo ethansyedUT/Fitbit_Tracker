@@ -2,12 +2,12 @@
 # Vivado v2022.2 (64-bit)
 # SW Build 3671981 on Fri Oct 14 05:00:03 MDT 2022
 # IP Build 3669848 on Fri Oct 14 08:30:02 MDT 2022
-# Start of session at: Fri Sep 27 04:50:25 2024
-# Process ID: 10788
+# Start of session at: Fri Sep 27 22:48:39 2024
+# Process ID: 384
 # Current directory: C:/Users/Ethan/Desktop/Classes/ECE460M-DigitalSysDesign/Labs/Lab3/Lab3.runs/synth_1
-# Command line: vivado.exe -log pulse_gen_test.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source pulse_gen_test.tcl
-# Log file: C:/Users/Ethan/Desktop/Classes/ECE460M-DigitalSysDesign/Labs/Lab3/Lab3.runs/synth_1/pulse_gen_test.vds
+# Command line: vivado.exe -log system.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source system.tcl
+# Log file: C:/Users/Ethan/Desktop/Classes/ECE460M-DigitalSysDesign/Labs/Lab3/Lab3.runs/synth_1/system.vds
 # Journal file: C:/Users/Ethan/Desktop/Classes/ECE460M-DigitalSysDesign/Labs/Lab3/Lab3.runs/synth_1\vivado.jou
 # Running On: EthanWindows, OS: Windows, CPU Frequency: 2304 MHz, CPU Physical cores: 8, Host memory: 16886 MB
 #-----------------------------------------------------------
-source pulse_gen_test.tcl -notrace
+source system.tcl -notrace

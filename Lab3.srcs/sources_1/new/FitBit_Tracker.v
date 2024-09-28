@@ -22,50 +22,27 @@
 
 module FitBit_Tracker(
     input wire pulse, clk, rst,
-    output reg [13:0] value // will switch between the 4 desired vals every 2 sec
+    output reg [13:0] value,
+    output reg decOn
 );
+
+
     // Second generator
     wire sec_pulse;
-    reg [25:0]seconds = 0; // enough seconds to hold a year if you wanted
+    reg [30:0] seconds = 0;
     sec_gen sec(.clk(clk), .slowClk(sec_pulse));
     
-    ////////////////////////////////////////////////////////////////////////
-    
     // General Internal Regs
-    reg [13:0] step_count;  // total (Can exceed 9999 but sys should detect and saturate sys until rst
+    reg [25:0] step_count = 0;
+    reg [13:0] dist = 0;
+    reg [6:0] walk9_count = 0;
+    reg [13:0] highAct_sec = 0;
+    reg [30:0] last_count = 0;
+    reg [13:0] consecHA = 0; 
+    reg [1:0] state = 0;
     
-    reg [13:0] dist;        // Miles walked (0.5 mi increments)
-    
-    reg [6:0] walk9_count;  // For first 9 sec (start/rst) # of secs over 9
-    
-    reg [13:0] highAct_sec; //total consistent seconds >= 60 of high activity
-    reg [13:0] last_count = 0; //logic has potential for OVF i will not account for
-    reg [6:0] consecHA = 0;
-    reg highActFlag = 0;
-    
-    reg [1:0] state; // what state to send to output
-    ////////////////////////////////////////////////////////////////////////
-
-    // Combinational
-    always @(*) begin
-        //Switching output vals every 2 sec
-        if(seconds % 2 == 0 && seconds != 0)begin
-            state = state + 1;
-        end
-        
-        // State 2 logic
-        dist <= (step_count*5)/2048; // display this value as (value * 0.1)
-        
-        case(state)
-            2'b00: value = step_count;
-            2'b01: value = dist;
-            2'b10: value = {7'b0, walk9_count};
-            2'b11: value = highAct_sec;
-         endcase
-    end
-    
-    // Sequential
-    always @(posedge sec_pulse or posedge rst)begin
+    // Main logic
+    always @(posedge clk or posedge rst) begin
         if (rst) begin
             step_count <= 0;
             dist <= 0;
@@ -73,45 +50,67 @@ module FitBit_Tracker(
             highAct_sec <= 0;
             last_count <= 0;
             consecHA <= 0;
-            highActFlag <= 0;
             state <= 0;
+            seconds <= 0;
+            value <= 0;
         end else begin
-            seconds = seconds + 1;
-            // State 3
-            if(step_count > seconds * 32 && seconds < 10)
-                walk9_count <= walk9_count + 1;
+            // Step count logic
+            if (pulse) 
+                step_count <= step_count + 1;
             
-            // Calculating steps since last sec
-            if(step_count - last_count >= 64)
-                consecHA = consecHA + 1;
-            else 
-                consecHA = 0;
-            last_count <= step_count;   // reset step/sec counter
+            // Second pulse logic
+            if (sec_pulse) begin
+                seconds = seconds + 1;
                 
-            // State 4
-            if(consecHA == 60)begin
-                highAct_sec <= highAct_sec + 60;
-            end else if(consecHA > 60)
-                highAct_sec <= highAct_sec + 1;
+                // State switching logic 
+                if (seconds % 2 == 0) begin // Very first state will only stay on for a second
+                    state <= state + 1;
+                end
+                
+                // Walk9 count logic
+                if (step_count - last_count > 32 && seconds < 10) begin
+                    walk9_count <= walk9_count + 1;
+                end
+                
+                // High activity logic
+                if (step_count - last_count >= 64) begin
+                    consecHA <= consecHA + 1;
+                    if (consecHA == 59) begin
+                        highAct_sec <= highAct_sec + 60;
+                    end else if (consecHA >= 60) begin
+                        highAct_sec <= highAct_sec + 1;
+                    end
+                end else begin
+                    consecHA <= 0;
+                end
+                
+                last_count <= step_count;
+            end
+            
+            // Update dist and value every clock cycle
+            dist <= (step_count / 2048) * 5;
+            
+            case(state)
+                2'b00: begin
+                 value <= step_count;
+                 decOn <= 0;
+                end
+                2'b01: begin
+                    value <= dist;
+                    decOn <= 1;
+                end
+                2'b10: begin
+                    value <= {7'b0, walk9_count};
+                    decOn <= 0;
+                end
+                2'b11: begin
+                    value <= highAct_sec;
+                    decOn <= 0;
+                end
+            endcase
         end
-        
     end
-    
-    always @(posedge pulse or posedge rst)begin
-        if (rst) begin
-            step_count <= 0;
-            dist <= 0;
-            walk9_count <= 0;
-            highAct_sec <= 0;
-            last_count <= 0;
-            consecHA <= 0;
-            highActFlag <= 0;
-            state <= 0;
-        end
-        else
-            step_count <= step_count + 1;
-    end
+endmodule
  
 
 
-endmodule

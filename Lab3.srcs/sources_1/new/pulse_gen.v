@@ -64,18 +64,18 @@ module pulse_gen(
     always @(*) begin
          // Calculate Threshold / Pulse freq.
         case (mode)
-            2'b00: threshold = FREQ_100MHZ / FREQ_32HZ / 2 - 1;
-            2'b01: threshold = FREQ_100MHZ / FREQ_64HZ / 2 - 1;
-            2'b10: threshold = FREQ_100MHZ / FREQ_128HZ / 2 - 1;
+            2'b00: threshold = (FREQ_100MHZ / FREQ_32HZ) - 1;
+            2'b01: threshold = (FREQ_100MHZ / FREQ_64HZ) - 1;
+            2'b10: threshold = (FREQ_100MHZ / FREQ_128HZ) - 1;
             2'b11: begin  // Hybrid mode
                 if (sec_elapsed <= 8)
-                    threshold = FREQ_100MHZ / pulse_schedule[sec_elapsed] / 2 - 1;
+                    threshold = FREQ_100MHZ / pulse_schedule[sec_elapsed] - 1;
                 else if (sec_elapsed <= 72)
-                    threshold = FREQ_100MHZ / pulse_schedule[9] / 2 - 1;
+                    threshold = FREQ_100MHZ / pulse_schedule[9] - 1;
                 else if (sec_elapsed > 72 && sec_elapsed <= 78)
-                    threshold = FREQ_100MHZ / pulse_schedule[10] / 2 - 1;
+                    threshold = FREQ_100MHZ / pulse_schedule[10] - 1;
                 else if (sec_elapsed <= 143)
-                    threshold = FREQ_100MHZ / pulse_schedule[11] / 2 - 1;
+                    threshold = FREQ_100MHZ / pulse_schedule[11]  - 1;
                 else
                     threshold = FREQ_100MHZ * 2 ;  // Threshold that will never be reached --> off
             
@@ -93,9 +93,10 @@ module pulse_gen(
         end else if(start)begin
             if (clk_counter >= threshold) begin
                 clk_counter <= 0;
-                pulse <= ~pulse;
+                pulse <= 1;
             end else begin
                 clk_counter <= clk_counter + 1;
+                pulse <= 0;
             end
             
             if (second_counter == 100_000_000) begin
@@ -103,9 +104,11 @@ module pulse_gen(
                 if (mode == 2'b11) begin
                     if (sec_elapsed < 144) 
                         sec_elapsed <= sec_elapsed + 1;
-                    else
+                    else begin
                         clk_counter <= 0;   // If sec >= 144 sec; elapsed_sec stays at 144 and clk_counter resets to 0 every second
                                             //      Therefore threshold is never met and led is off
+                        pulse <= 0;
+                    end
                 end else
                     sec_elapsed <= 0;   // handle switching back to hybrid mode 
             end else begin
